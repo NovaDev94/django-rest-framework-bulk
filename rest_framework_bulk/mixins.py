@@ -42,8 +42,8 @@ class BulkUpdateModelMixin(object):
     ``many=True`` ability from Django REST >= 2.2.5.
     """
 
-    def get_object(self):
-        return self.get_queryset()
+    # def get_object(self):
+    #     return self.get_queryset()
 
     def bulk_update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)

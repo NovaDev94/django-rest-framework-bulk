@@ -58,6 +58,7 @@ setup(
     install_requires=[
         'django',
         'djangorestframework',
+        'drf-extensions'
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',

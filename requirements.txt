@@ -4,3 +4,4 @@ django-nose
 djangorestframework
 mock
 tox
+drf-extensions
