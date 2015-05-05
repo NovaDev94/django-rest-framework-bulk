@@ -65,7 +65,13 @@ class BulkUpdateModelMixin(object):
             [self.post_save(obj, created=False) for obj in self.object]
             return Response(serializer.data, status=status.HTTP_200_OK)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        errors = serializer.errors
+        for i, e in enumerate(request.DATA):
+            identity = e.get('id', e.get('pk'))
+            if identity:
+                errors[i]['id'] = e.get('id', e.get('pk'))
+
+        return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
     def partial_bulk_update(self, request, *args, **kwargs):
         kwargs['partial'] = True
