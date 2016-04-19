@@ -70,16 +70,24 @@ class BulkUpdateModelMixin(object):
             many=True,
             partial=partial,
         )
-        serializer.is_valid(raise_exception=True)
-        self.perform_bulk_update(serializer)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+
+        if serializer.is_valid():
+            self.perform_bulk_update(serializer)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            errors = serializer.errors
+            for i, e in enumerate(request.data):
+                identity = e.get('id', e.get('pk'))
+                if identity:
+                    errors[i]['id'] = e.get('id', e.get('pk'))
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
     def partial_bulk_update(self, request, *args, **kwargs):
         kwargs['partial'] = True
         return self.bulk_update(request, *args, **kwargs)
 
-    def perform_update(self, serializer):
-        serializer.save()
+    # def perform_update(self, serializer):
+    #     serializer.save()
 
     def perform_bulk_update(self, serializer):
         return self.perform_update(serializer)
