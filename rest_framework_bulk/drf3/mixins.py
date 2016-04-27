@@ -62,7 +62,6 @@ class BulkUpdateModelMixin(object):
 
     def bulk_update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
-
         # restrict the update to the filtered queryset
         serializer = self.get_serializer(
             self.filter_queryset(self.get_queryset()),
@@ -71,23 +70,13 @@ class BulkUpdateModelMixin(object):
             partial=partial,
         )
 
-        if serializer.is_valid():
-            self.perform_bulk_update(serializer)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            errors = serializer.errors
-            for i, e in enumerate(request.data):
-                identity = e.get('id', e.get('pk'))
-                if identity:
-                    errors[i]['id'] = e.get('id', e.get('pk'))
-            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        self.perform_bulk_update(serializer)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def partial_bulk_update(self, request, *args, **kwargs):
         kwargs['partial'] = True
         return self.bulk_update(request, *args, **kwargs)
-
-    # def perform_update(self, serializer):
-    #     serializer.save()
 
     def perform_bulk_update(self, serializer):
         return self.perform_update(serializer)
@@ -117,9 +106,6 @@ class BulkDestroyModelMixin(object):
         self.perform_bulk_destroy(filtered)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def perform_destroy(self, instance):
-        instance.delete()
 
     def perform_bulk_destroy(self, objects):
         for obj in objects:
