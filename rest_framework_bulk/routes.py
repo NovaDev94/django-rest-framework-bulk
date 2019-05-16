@@ -1,34 +1,33 @@
 from __future__ import unicode_literals, print_function
+
 import copy
-from rest_framework.routers import DefaultRouter, SimpleRouter
+
+from rest_framework.routers import SimpleRouter
 from rest_framework_extensions.routers import ExtendedSimpleRouter
 
 
-__all__ = [
-    'BulkRouter', 'BulkExtendedSimpleRouter'
-]
+__all__ = ['BulkRouter', 'BulkExtendedSimpleRouter']
 
 
-class BulkRouter(DefaultRouter):
-    """
-    Map http methods to actions defined on the bulk mixins.
-    """
-    routes = copy.deepcopy(SimpleRouter.routes)
+def patch(base_routes):
+    routes = copy.deepcopy(base_routes)
     routes[0].mapping.update({
         'put': 'bulk_update',
         'patch': 'partial_bulk_update',
         'delete': 'bulk_destroy',
     })
+    return routes
+
+
+class BulkRouter(SimpleRouter):
+    """
+    Map http methods to actions defined on the bulk mixins.
+    """
+    routes = patch(SimpleRouter.routes)
 
 
 class BulkExtendedSimpleRouter(ExtendedSimpleRouter):
     """
     Map http methods to actions defined on the bulk mixins.
     """
-    routes = copy.deepcopy(ExtendedSimpleRouter.routes)
-    routes[0].mapping.update({
-        'put': 'bulk_update',
-        'patch': 'partial_bulk_update',
-        'delete': 'bulk_destroy',
-    })
-    _routs = routes[2:4] + routes[:2]
+    routes = patch(ExtendedSimpleRouter.routes)
